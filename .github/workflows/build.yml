@@ -79,3 +79,42 @@ jobs:
         with:
           path: example/build/example.pdf
           archive: false
+
+  research:
+    name: Build research article (XeLaTeX)
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up TeX Live
+        uses: TeX-Live/setup-texlive-action@eb78d21f41941476d9121e3a0abcab73265c876f # v4.1.1
+        with:
+          packages: |
+            scheme-small
+            collection-xetex
+            hyphen-russian
+            caption
+            enumitem
+            microtype
+            setspace
+            titlesec
+            xurl
+
+      - name: Compile news-stability.tex
+        working-directory: github_article
+        run: |
+          mkdir -p build/research
+          xelatex -interaction=nonstopmode -halt-on-error -file-line-error -output-directory=build/research article/news-stability.tex
+          xelatex -interaction=nonstopmode -halt-on-error -file-line-error -output-directory=build/research article/news-stability.tex
+
+      - name: Upload research article PDF
+        uses: actions/upload-artifact@v7
+        with:
+          path: github_article/build/research/news-stability.pdf
+          archive: false
+          if-no-files-found: error
